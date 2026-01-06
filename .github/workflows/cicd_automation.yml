@@ -1,0 +1,75 @@
+name: Flutter APK Build & Appium Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  android-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Java
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3️⃣ Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: 'stable'
+          cache: true
+
+      # 4️⃣ Install Flutter dependencies
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # 5️⃣ Build APK
+      - name: Build APK
+        run: flutter build apk --debug
+
+      # 6️⃣ Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 7️⃣ Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 8️⃣ Start Android Emulator
+      - name: Start Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          emulator-options: -no-window -no-audio -no-snapshot
+          disable-animations: true
+          script: echo "Emulator started"
+
+      # 9️⃣ Install APK on emulator
+      - name: Install APK
+        run: |
+          adb install build/app/outputs/flutter-apk/app-debug.apk
+
+      # 🔟 Run Appium tests
+      - name: Run Appium tests
+        run: |
+          pytest appium_tests -v
