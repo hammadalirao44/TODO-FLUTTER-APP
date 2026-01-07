@@ -14,11 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -26,17 +24,14 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # Install dependencies
       - name: Flutter pub get
         run: flutter pub get
 
-      # Build APK
       - name: Build APK
         run: flutter build apk --release
 
-      # Upload APK artifact
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -46,11 +41,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -58,17 +51,14 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # Install dependencies
       - name: Flutter pub get
         run: flutter pub get
 
-      # Build IPA
       - name: Build IPA
         run: flutter build ios --release --no-codesign
 
-      # Upload IPA artifact
       - name: Upload IPA
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release-ipa
           path: build/ios/iphoneos/Runner.ipa
