@@ -17,6 +17,9 @@ jobs:
       with:
         flutter-version: '3.38.5'
 
+    - name: Disable Flutter analytics
+      run: flutter --disable-analytics
+
     - name: Install Flutter dependencies
       run: flutter pub get
 
@@ -46,8 +49,19 @@ jobs:
         emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
         script: |
           yes | sdkmanager --licenses
+
+          echo "⏳ Waiting for emulator to boot..."
+          adb wait-for-device
+
+          until adb shell getprop sys.boot_completed | grep -m 1 '1'; do
+            sleep 5
+          done
+
+          echo "✅ Emulator is ready"
+
           sudo npm install -g appium
           appium --log-level error &
-          sleep 10
+          sleep 15
+
           pip install -r tests/requirements.txt
           pytest tests
